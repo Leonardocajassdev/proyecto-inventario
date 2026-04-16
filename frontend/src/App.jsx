@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import "./App.css";
 import { FaTrash } from "react-icons/fa";
 
-const API = import.meta.env.VITE_API_URL;
+const API = import.meta.env.VITE_API_URL || "http://localhost:3000";
 
 function App() {
   const [products, setProducts] = useState([]);
