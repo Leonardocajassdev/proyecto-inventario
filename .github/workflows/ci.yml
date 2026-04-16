@@ -30,10 +30,10 @@ jobs:
           cd backend
           npx prisma generate
 
-      - name: ✅ Validar backend
+      - name: 🧪 Test backend
         run: |
           cd backend
-          node -e "console.log('Backend OK')"
+          npm test
 
       # 🟣 FRONTEND
       - name: 📦 Instalar frontend
@@ -45,3 +45,23 @@ jobs:
         run: |
           cd frontend
           npm run build
+
+      # 🚀 LEVANTAR BACKEND (para E2E)
+      - name: ▶️ Start backend
+        run: |
+          cd backend
+          npm run dev &
+      
+      - name: ⏳ Esperar backend
+        run: sleep 5
+
+      # 🎭 PLAYWRIGHT
+      - name: 🎭 Instalar Playwright
+        run: |
+          cd frontend
+          npx playwright install
+
+      - name: 🧪 Run E2E tests
+        run: |
+          cd frontend
+          npm run test:e2e

@@ -26,6 +26,13 @@ lerna-debug.log*
 
 # Coverage (tests)
 coverage/
+# Stryker (mutation testing)
+.stryker-tmp/
+reports/mutation/
+
+# Playwright
+test-results/
+playwright-report/
 
 # OS / Editor
 .vscode/*
@@ -37,3 +44,4 @@ coverage/
 *.njsproj
 *.sln
 *.sw?
+

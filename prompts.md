@@ -12,21 +12,38 @@ Se utilizó IA como apoyo para acelerar el desarrollo y resolver problemas puntu
 
 ## Prompts representativos
 
-Algunos ejemplos de consultas realizadas:
+🤖 Uso de IA
 
-- "Cómo estructurar un backend con Express y Prisma para un sistema de inventario"
-- "Cómo calcular stock a partir de movimientos en lugar de almacenarlo directamente"
-- "Cómo validar que no haya salidas de inventario si no existe stock suficiente"
-- "Error al usar Prisma Client"
+Durante el desarrollo del proyecto se utilizó IA como herramienta de apoyo técnico para acelerar la implementación, validar enfoques y resolver problemas específicos.
 
-## Enfoque de uso
+🧠 Consultas relevantes realizadas
 
-La IA fue utilizada como una herramienta de apoyo para:
+Se realizaron consultas orientadas a resolver decisiones técnicas clave, por ejemplo:
 
-- Explorar enfoques de implementación
-- Validar decisiones técnicas
-- Resolver errores específicos
+Cómo estructurar un backend con Express y Prisma siguiendo buenas prácticas
+Cómo modelar un sistema de inventario basado en movimientos en lugar de stock persistente
+Estrategias para calcular el stock dinámicamente a partir de entradas y salidas
+Cómo implementar validaciones de negocio para evitar salidas de inventario sin stock disponible
+Resolución de errores relacionados con Prisma Client y configuración del entorno
+Cómo organizar un frontend en React con un flujo claro para gestión de productos y movimientos
+Implementación de testing en diferentes niveles (unitario, property-based, mutation y end-to-end)
+Configuración de variables de entorno para soportar entornos local y producción
+Integración entre frontend y backend desplegados
+⚙️ Enfoque de uso
 
-El diseño de la interfaz, la organización de la experiencia de usuario (UX) y la disposición de los componentes en pantalla fueron definidos manualmente, priorizando claridad, usabilidad y buenas prácticas en la interacción del usuario.
+La IA se utilizó principalmente para:
 
-Las decisiones finales de diseño, estructura y lógica fueron ajustadas manualmente para cumplir con los requerimientos de la prueba.
+Explorar alternativas de implementación
+Validar decisiones de arquitectura
+Resolver errores técnicos concretos
+Optimizar fragmentos de código
+🎨 Decisiones propias
+
+El diseño de la interfaz, la experiencia de usuario (UX) y la organización de la aplicación fueron definidos manualmente, priorizando:
+
+Claridad en el flujo de uso
+Separación de responsabilidades
+Simplicidad en la interacción
+Visualización eficiente de la información
+
+Asimismo, la estructura final del proyecto, las reglas de negocio y la integración completa del sistema fueron ajustadas manualmente para cumplir con los requerimientos de la prueba.
