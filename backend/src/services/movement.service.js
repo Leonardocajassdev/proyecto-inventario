@@ -12,7 +12,7 @@ export const createMovement = async ({ productId, type, quantity }) => {
 
   const stock = await calculateStock(productId);
 
-  // 🟢 ENTRADAS (IN) siempre permitidas
+  //  ENTRADAS (IN) siempre permitidas
   if (type === "OUT") {
     // ❌ No permitir stock negativo
     if (quantity > stock) {

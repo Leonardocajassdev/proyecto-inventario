@@ -13,7 +13,7 @@ function App() {
   const [description, setDescription] = useState("");
   const [minStock, setMinStock] = useState("");
 
-  // 🔄 Obtener productos
+  // Obtener productos
   const fetchProducts = async () => {
     try {
       const res = await fetch(`${API}/products`);
@@ -28,7 +28,7 @@ function App() {
     fetchProducts();
   }, []);
 
-  // 🟢 Crear producto
+  // Crear producto
   const handleCreateProduct = async () => {
     if (!name || !minStock) {
       alert("Nombre y stock mínimo son obligatorios");
@@ -67,7 +67,7 @@ function App() {
     }
   };
 
-  // 🗑️ Eliminar producto
+  //  Eliminar producto
   const handleDelete = async (id) => {
     if (!confirm("¿Eliminar producto?")) return;
 
@@ -89,7 +89,7 @@ function App() {
     }
   };
 
-  // 🔵 Crear movimiento
+  // Crear movimiento
   const handleMovement = async () => {
     if (!selectedProduct || quantity <= 0) {
       alert("Selecciona producto y cantidad válida");
@@ -134,7 +134,7 @@ function App() {
 
       <div className="layout">
 
-        {/* 🟢 COLUMNA IZQUIERDA */}
+        {/*  COLUMNA IZQUIERDA */}
         <div className="left">
 
           <div className="card">
@@ -211,7 +211,7 @@ function App() {
 
         </div>
 
-        {/* 📦 COLUMNA DERECHA */}
+        {/* COLUMNA DERECHA */}
         <div className="right">
           <div className="card">
             <h2>Productos</h2>
