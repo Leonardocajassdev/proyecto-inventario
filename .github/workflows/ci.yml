@@ -46,14 +46,21 @@ jobs:
           cd frontend
           npm run build
 
-      # 🚀 LEVANTAR BACKEND (para E2E)
+      # 🚀 START BACKEND
       - name: ▶️ Start backend
         run: |
           cd backend
           npm run dev &
-      
-      - name: ⏳ Esperar backend
-        run: sleep 5
+
+      # 🚀 START FRONTEND
+      - name: ▶️ Start frontend
+        run: |
+          cd frontend
+          npm run preview &
+
+      # ⏳ Esperar servicios
+      - name: ⏳ Wait services
+        run: sleep 8
 
       # 🎭 PLAYWRIGHT
       - name: 🎭 Instalar Playwright
