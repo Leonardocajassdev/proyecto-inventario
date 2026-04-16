@@ -2,9 +2,9 @@ name: CI Pipeline
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
 
 jobs:
   build:
@@ -12,31 +12,31 @@ jobs:
 
     steps:
       - name: 📥 Clonar repositorio
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: 🟢 Configurar Node
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: 18
 
       # 🔵 BACKEND
-      - name: 📦 Instalar dependencias (backend)
+      - name: 📦 Instalar backend
         run: |
           cd backend
           npm install
 
-      - name: ⚙️ Generar Prisma Client
+      - name: ⚙️ Prisma generate
         run: |
           cd backend
           npx prisma generate
 
-      - name: 🧪 Build backend (validación)
+      - name: ✅ Validar backend
         run: |
           cd backend
           node -e "console.log('Backend OK')"
 
       # 🟣 FRONTEND
-      - name: 📦 Instalar dependencias (frontend)
+      - name: 📦 Instalar frontend
         run: |
           cd frontend
           npm install
