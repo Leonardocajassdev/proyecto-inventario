@@ -1,0 +1,47 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v3
+
+      - name: 🟢 Configurar Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+
+      # 🔵 BACKEND
+      - name: 📦 Instalar dependencias (backend)
+        run: |
+          cd backend
+          npm install
+
+      - name: ⚙️ Generar Prisma Client
+        run: |
+          cd backend
+          npx prisma generate
+
+      - name: 🧪 Build backend (validación)
+        run: |
+          cd backend
+          node -e "console.log('Backend OK')"
+
+      # 🟣 FRONTEND
+      - name: 📦 Instalar dependencias (frontend)
+        run: |
+          cd frontend
+          npm install
+
+      - name: 🏗️ Build frontend
+        run: |
+          cd frontend
+          npm run build

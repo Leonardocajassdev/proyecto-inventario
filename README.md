@@ -1,4 +1,4 @@
-# Sistema de Inventario
+# 📦 Sistema de Inventario
 
 Aplicación full-stack para la gestión de inventario, que permite registrar productos, controlar movimientos de stock (entradas y salidas) y aplicar validaciones de negocio.
 
@@ -18,6 +18,13 @@ Aplicación full-stack para la gestión de inventario, que permite registrar pro
 
 ---
 
+## 🌐 Despliegue
+
+- 🔗 Frontend: https://proyecto-inventario-iota.vercel.app  
+- 🔗 Backend: https://proyecto-inventario-5izm.onrender.com  
+
+---
+
 ## 📦 Funcionalidades
 
 - Crear productos con stock mínimo configurable
@@ -25,9 +32,9 @@ Aplicación full-stack para la gestión de inventario, que permite registrar pro
   - Entrada (IN)
   - Salida (OUT)
 - Cálculo dinámico de stock basado en movimientos
-- Validación de stock insuficiente (no permite salidas inválidas)
-- Alerta visual cuando el stock está por debajo del mínimo
-- Eliminación de productos (con manejo de relaciones)
+- Validación de stock insuficiente
+- Alerta visual de stock bajo
+- Eliminación de productos
 
 ---
 
@@ -41,51 +48,58 @@ Aplicación full-stack para la gestión de inventario, que permite registrar pro
 
 ## 🏗️ Estructura del proyecto
 
-proyecto-inventario/
-├── backend/ # Código fuente de la API
-├── frontend/ # Código fuente de la aplicación React
-├── docs/ # Artefactos de documentación generados con IA
-│ ├── PRD.md # Product Requirements Document
-│ ├── user-stories.md
-│ └── tickets.md
-├── prompts.md # Bitácora de uso de IA (Obligatorio)
-└── README.md # Documentación principal del proyecto
 
+proyecto-inventario/
+├── backend/
+├── frontend/
+├── docs/
+├── prompts.md
+└── README.md
 
 
 ---
 
-## ⚙️ Cómo ejecutar el proyecto
+## ⚙️ Cómo ejecutar el proyecto en local
 
-### 1. Backend
+### 🔵 Backend
 
 ```bash
 cd backend
 npm install
+npx prisma generate
+npx prisma db push
 npm run dev
 
+Servidor en:
 http://localhost:3000
 
+🟣 Frontend
 
-### 2. frontend
 cd frontend
 npm install
 npm run dev
 
-http://localhost:3000
+Aplicación en:
+
+http://localhost:5173
+
+🔧 Variables de entorno
+Backend (backend/.env)
+DATABASE_URL="file:./dev.db"
+
+Frontend (frontend/.env)
+VITE_API_URL=http://localhost:3000
 
 🔌 Endpoints principales
 Productos
-GET /products → Obtener lista de productos con stock calculado
+GET /products → Obtener productos con stock calculado
 POST /products → Crear producto
 DELETE /products/:id → Eliminar producto
-Movimientos
-POST /movements → Registrar movimiento de inventario
 
+Movimientos
+POST /movements → Registrar movimiento
 📌 Decisiones técnicas
-Se optó por calcular el stock dinámicamente para evitar inconsistencias
-Se utilizó Prisma como ORM para simplificar la gestión de base de datos
-La interfaz se diseñó priorizando claridad y flujo de uso (acciones a la izquierda, visualización a la derecha)
-⚠️ Consideraciones
-Base de datos SQLite incluida para facilidad de ejecución
-No se implementa autenticación (fuera del alcance de la prueba)
+El stock se calcula dinámicamente para evitar inconsistencias
+Se utiliza Prisma ORM para simplificar la interacción con la base de datos
+Separación clara de responsabilidades (routes, services, utils)
+Uso de variables de entorno para soportar múltiples entornos (local y producción)
