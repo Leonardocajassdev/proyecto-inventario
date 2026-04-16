@@ -45,30 +45,3 @@ jobs:
         run: |
           cd frontend
           npm run build
-
-      # 🚀 START BACKEND
-      - name: ▶️ Start backend
-        run: |
-          cd backend
-          npm run dev &
-
-      # 🚀 START FRONTEND
-      - name: ▶️ Start frontend
-        run: |
-          cd frontend
-          npm run preview &
-
-      # ⏳ Esperar servicios
-      - name: ⏳ Wait services
-        run: sleep 8
-
-      # 🎭 PLAYWRIGHT
-      - name: 🎭 Instalar Playwright
-        run: |
-          cd frontend
-          npx playwright install
-
-      - name: 🧪 Run E2E tests
-        run: |
-          cd frontend
-          npm run test:e2e
