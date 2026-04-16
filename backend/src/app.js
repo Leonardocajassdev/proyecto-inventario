@@ -7,7 +7,9 @@ import movementRoutes from "./routes/movement.routes.js";
 const app = express();
 
 // Middlewares
-app.use(cors());
+app.use(cors({
+  origin: "*", // puedes restringir luego
+}));
 app.use(express.json());
 
 // Rutas
