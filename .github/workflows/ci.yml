@@ -199,7 +199,7 @@ jobs:
         run: |
           # Arrancar backend con logs visibles
           cd backend
-          NODE_ENV=test PORT=3000 DATABASE_URL="file:./e2e-test.db" npm start > /tmp/backend.log 2>&1 &
+          NODE_ENV=e2e PORT=3000 DATABASE_URL="file:./e2e-test.db" npm start > /tmp/backend.log 2>&1 &
           BACKEND_PID=$!
           cd ..
 
