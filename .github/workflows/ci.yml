@@ -235,6 +235,12 @@ jobs:
         env:
           BASE_URL: http://localhost:5173
 
+        working-directory: frontend
+        run: |
+          echo "=== BACKEND LOG ===" && cat /tmp/backend.log
+          curl -v http://localhost:3000/products || true
+          npx playwright test --reporter=list
+
       - name: 📤 Subir reporte Playwright
         uses: actions/upload-artifact@v5
         if: always()
