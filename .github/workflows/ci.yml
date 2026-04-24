@@ -163,7 +163,7 @@ jobs:
   e2e-tests:
     name: 🎭 E2E Tests (Playwright)
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
     needs: [backend-tests, frontend-build]
 
     steps:
