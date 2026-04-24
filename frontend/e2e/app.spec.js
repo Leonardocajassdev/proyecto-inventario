@@ -1,30 +1,28 @@
 import { test, expect } from "@playwright/test";
 
 test("crear producto y visualizarlo", async ({ page }) => {
-  await page.goto("/");
+  const consoleMessages = [];
+  page.on("console", msg => consoleMessages.push(`[${msg.type()}] ${msg.text()}`));
+  page.on("pageerror", err => consoleMessages.push(`[pageerror] ${err.message}`));
 
-  // Esperar a que la página esté completamente cargada:
-  // el fetch inicial de productos termina y el DOM se estabiliza
-  await page.waitForLoadState("networkidle");
+  await page.goto("/");
+  await page.waitForTimeout(3000);
+
+  await page.screenshot({ path: "test-results/debug-initial.png", fullPage: true });
+  console.log("Console msgs:", JSON.stringify(consoleMessages));
+
+  const bodyText = await page.locator("body").innerText().catch(() => "ERROR");
+  console.log("Body text:", bodyText.substring(0, 500));
+
+  const inputs = await page.locator("input").count();
+  console.log("Inputs encontrados:", inputs);
 
   const productName = "Producto E2E " + Date.now();
 
-  // Usar placeholder para identificar cada input con precisión
-  const nameInput = page.getByPlaceholder("Ej. Laptop Dell XPS");
-  const descInput = page.getByPlaceholder("Descripción opcional");
-  const minStockInput = page.getByPlaceholder("0").first();
+  await page.getByPlaceholder("Ej. Laptop Dell XPS").fill(productName);
+  await page.getByPlaceholder("Descripción opcional").fill("Descripción E2E");
+  await page.getByPlaceholder("0").first().fill("5");
 
-  // Esperar que el input esté estable en el DOM antes de interactuar
-  await nameInput.waitFor({ state: "visible" });
-  await nameInput.fill(productName);
-
-  await descInput.waitFor({ state: "visible" });
-  await descInput.fill("Descripción E2E");
-
-  await minStockInput.waitFor({ state: "visible" });
-  await minStockInput.fill("5");
-
-  // Esperar la respuesta del POST antes de continuar
   const [postResponse] = await Promise.all([
     page.waitForResponse(
       res => res.url().includes("/products") && res.request().method() === "POST"
@@ -33,10 +31,7 @@ test("crear producto y visualizarlo", async ({ page }) => {
   ]);
 
   console.log("POST status:", postResponse.status());
-
-  // Esperar que la lista se actualice con networkidle
   await page.waitForLoadState("networkidle");
-
   await page.screenshot({ path: "test-results/debug-after-create.png", fullPage: true });
 
   await expect(
