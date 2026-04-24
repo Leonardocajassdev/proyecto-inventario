@@ -199,7 +199,7 @@ jobs:
         run: |
           # Arrancar backend con logs visibles
           cd backend
-          NODE_ENV=test PORT=3000 DATABASE_URL="file:./e2e-test.db" npm start > /tmp/backend.log 2>&1 &
+          NODE_ENV=e2e PORT=3000 DATABASE_URL="file:./e2e-test.db" npm start > /tmp/backend.log 2>&1 &
           BACKEND_PID=$!
           cd ..
 
@@ -207,6 +207,9 @@ jobs:
           cd frontend
           VITE_API_URL=http://localhost:3000 npm run dev > /tmp/frontend.log 2>&1 &
           cd ..
+
+          # Dar tiempo inicial al backend para arrancar
+          sleep 3
 
           # Esperar ambos (verificar con curl -s sin -f para aceptar cualquier respuesta HTTP)
           for i in $(seq 1 40); do
