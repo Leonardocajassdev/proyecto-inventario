@@ -39,7 +39,7 @@ function Toast({ msg, type, onDone }) {
   );
 }
 
-/* ─── Barra de stock visual ──────────────────────── */
+/* ─── Barra de stock visual ───────────────────── */
 function StockBar({ stock, minStock }) {
   const max = Math.max(minStock * 2.5, stock + 1, 10);
   const pct  = Math.min((stock / max) * 100, 100);
