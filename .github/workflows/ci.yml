@@ -11,9 +11,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # ────────────────────────────────────────────────
-  # JOB 1: Tests unitarios + integración + PBT
-  # ────────────────────────────────────────────────
   backend-tests:
     name: 🧪 Backend — Unit & Integration Tests
     runs-on: ubuntu-latest
@@ -74,10 +71,6 @@ jobs:
           path: backend/coverage/
           retention-days: 7
 
-  # ────────────────────────────────────────────────
-  # JOB 2: Mutation Testing con Stryker
-  # Solo en push a main (costoso en tiempo)
-  # ────────────────────────────────────────────────
   mutation-testing:
     name: 🧬 Mutation Testing (Stryker)
     runs-on: ubuntu-latest
@@ -123,9 +116,6 @@ jobs:
           path: backend/reports/mutation/
           retention-days: 14
 
-  # ────────────────────────────────────────────────
-  # JOB 3: Build del frontend
-  # ────────────────────────────────────────────────
   frontend-build:
     name: 🏗️ Frontend Build
     runs-on: ubuntu-latest
@@ -157,9 +147,6 @@ jobs:
           path: frontend/dist/
           retention-days: 3
 
-  # ────────────────────────────────────────────────
-  # JOB 4: E2E con Playwright
-  # ────────────────────────────────────────────────
   e2e-tests:
     name: 🎭 E2E Tests (Playwright)
     runs-on: ubuntu-latest
@@ -197,34 +184,26 @@ jobs:
 
       - name: 🚀 Levantar backend y frontend, esperar que estén listos
         run: |
-          # Arrancar backend con logs visibles
           cd backend
           NODE_ENV=e2e PORT=3000 DATABASE_URL="file:./e2e-test.db" npm start > /tmp/backend.log 2>&1 &
-          BACKEND_PID=$!
           cd ..
 
-          # Arrancar frontend
           cd frontend
           VITE_API_URL=http://localhost:3000 npm run dev > /tmp/frontend.log 2>&1 &
           cd ..
 
-          # Dar tiempo inicial al backend para arrancar
           sleep 3
 
-          # Esperar ambos (verificar con curl -s sin -f para aceptar cualquier respuesta HTTP)
           for i in $(seq 1 40); do
             BACKEND=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/products 2>/dev/null)
             FRONTEND=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:5173 2>/dev/null)
             echo "Intento $i — backend: $BACKEND | frontend: $FRONTEND"
-            # Aceptar cualquier código HTTP del backend (200, 500, etc.) — solo que responda
             [[ "$BACKEND" =~ ^[0-9]+$ && "$BACKEND" != "000" ]] && [ "$FRONTEND" = "200" ] && break
             sleep 2
           done
 
-          # Mostrar logs
           echo "=== BACKEND LOG ===" && cat /tmp/backend.log
 
-          # Verificar que el backend responde (cualquier HTTP code)
           CODE=$(curl -s -o /dev/null -w "%{http_code}" http://localhost:3000/products)
           echo "Backend HTTP code: $CODE"
           [[ "$CODE" =~ ^[0-9]+$ && "$CODE" != "000" ]] || (echo "Backend no responde en absoluto" && exit 1)
@@ -234,12 +213,6 @@ jobs:
         run: npx playwright test --reporter=list
         env:
           BASE_URL: http://localhost:5173
-
-        working-directory: frontend
-        run: |
-          echo "=== BACKEND LOG ===" && cat /tmp/backend.log
-          curl -v http://localhost:3000/products || true
-          npx playwright test --reporter=list
 
       - name: 📤 Subir reporte Playwright
         uses: actions/upload-artifact@v5
