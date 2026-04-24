@@ -99,6 +99,9 @@ jobs:
       - name: 📦 Instalar dependencias backend
         working-directory: backend
         run: npm ci
+        env:
+          PRISMA_ENGINES_CHECKSUM_IGNORE_MISSING: "1"
+        timeout-minutes: 10
 
       - name: ⚙️ Prisma generate
         working-directory: backend
@@ -110,7 +113,6 @@ jobs:
         env:
           NODE_ENV: test
           DATABASE_URL: "file:./test.db"
-          # Requerido para que Jest procese ESM (import/export) dentro de Stryker
           NODE_OPTIONS: "--experimental-vm-modules"
 
       - name: 📤 Subir reporte de mutación
@@ -187,17 +189,14 @@ jobs:
 
       - name: 🚀 Levantar backend en background
         working-directory: backend
-        run: |
-          npm start &
-          # Esperar a que el puerto esté disponible (máximo 30s)
-          # El endpoint raíz "/" responde con texto plano
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:3000/ && break || sleep 1
-          done
+        run: npm start &
         env:
           NODE_ENV: test
           PORT: 3000
           DATABASE_URL: "file:./e2e-test.db"
+
+      - name: ⏳ Esperar backend
+        run: npx wait-on http://localhost:3000/products --timeout 30000
 
       - name: 📦 Instalar frontend
         working-directory: frontend
@@ -209,13 +208,12 @@ jobs:
 
       - name: 🌐 Levantar frontend en background
         working-directory: frontend
-        run: |
-          npm run dev &
-          for i in $(seq 1 30); do
-            curl -sf http://localhost:5173 && break || sleep 1
-          done
+        run: npm run dev &
         env:
           VITE_API_URL: http://localhost:3000
+
+      - name: ⏳ Esperar frontend
+        run: npx wait-on http://localhost:5173 --timeout 15000
 
       - name: 🎭 Ejecutar tests E2E
         working-directory: frontend
