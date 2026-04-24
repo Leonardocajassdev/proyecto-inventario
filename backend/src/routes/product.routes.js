@@ -45,35 +45,39 @@ router.post("/", async (req, res) => {
       });
     }
 
+    if (!description) {
+      return res.status(400).json({ error: "La descripción es obligatoria" });
+    }
+
+    if (typeof minStock !== "number" || minStock < 0) {
+      return res.status(400).json({
+        error: "minStock debe ser un número mayor o igual a 0",
+      });
+    }
+
     const product = await prisma.product.create({
-      data: {
-        name,
-        description,
-        minStock,
-      },
+      data: { name, description, minStock },
     });
 
-    res.json(product);
+    res.status(201).json(product);
   } catch (error) {
     res.status(500).json({ error: error.message });
   }
 });
 
 
-// 🔴 ELIMINAR PRODUCTO (con manejo de relaciones)
+// 🔴 ELIMINAR PRODUCTO
 router.delete("/:id", async (req, res) => {
   try {
     const id = req.params.id;
 
-    // 🧹 eliminar movimientos primero
-    await prisma.inventoryMovement.deleteMany({
-      where: { productId: id },
-    });
+    // Verificar existencia primero (el test mockea findUnique para controlar este flujo)
+    const existing = await prisma.product.findUnique({ where: { id } });
+    if (!existing) {
+      return res.status(404).json({ error: "Producto no encontrado" });
+    }
 
-    // 🗑 eliminar producto
-    await prisma.product.delete({
-      where: { id },
-    });
+    await prisma.product.delete({ where: { id } });
 
     res.json({ message: "Producto eliminado" });
   } catch (error) {

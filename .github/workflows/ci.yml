@@ -6,42 +6,227 @@ on:
   pull_request:
     branches: ["main"]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  build:
+  # ────────────────────────────────────────────────
+  # JOB 1: Tests unitarios + integración + PBT
+  # ────────────────────────────────────────────────
+  backend-tests:
+    name: 🧪 Backend — Unit & Integration Tests
     runs-on: ubuntu-latest
+    timeout-minutes: 10
 
     steps:
       - name: 📥 Clonar repositorio
         uses: actions/checkout@v4
 
-      - name: 🟢 Configurar Node
+      - name: 🟢 Configurar Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: 📦 Instalar dependencias backend
+        working-directory: backend
+        run: npm ci
+
+      - name: ⚙️ Prisma generate
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: 🧪 Tests unitarios (services)
+        working-directory: backend
+        run: npm run test:unit -- --forceExit
+        env:
+          NODE_ENV: test
+          DATABASE_URL: "file:./test.db"
+
+      - name: 🔗 Tests de integración (routes)
+        working-directory: backend
+        run: npm run test:int -- --forceExit
+        env:
+          NODE_ENV: test
+          DATABASE_URL: "file:./test.db"
+
+      - name: 🎲 Property-Based Tests
+        working-directory: backend
+        run: npm run test:pbt -- --forceExit
+        env:
+          NODE_ENV: test
+          DATABASE_URL: "file:./test.db"
+
+      - name: 📊 Coverage report
+        working-directory: backend
+        run: npm run test:coverage -- --forceExit
+        env:
+          NODE_ENV: test
+          DATABASE_URL: "file:./test.db"
+
+      - name: 📤 Subir reporte de cobertura
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: coverage-report
+          path: backend/coverage/
+          retention-days: 7
+
+  # ────────────────────────────────────────────────
+  # JOB 2: Mutation Testing con Stryker
+  # Solo en push a main (costoso en tiempo)
+  # ────────────────────────────────────────────────
+  mutation-testing:
+    name: 🧬 Mutation Testing (Stryker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    needs: backend-tests
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: backend/package-lock.json
+
+      - name: 📦 Instalar dependencias backend
+        working-directory: backend
+        run: npm ci
+
+      - name: ⚙️ Prisma generate
+        working-directory: backend
+        run: npx prisma generate
+
+      - name: 🧬 Ejecutar Stryker
+        working-directory: backend
+        run: npm run mutation
+        env:
+          NODE_ENV: test
+          DATABASE_URL: "file:./test.db"
+          # Requerido para que Jest procese ESM (import/export) dentro de Stryker
+          NODE_OPTIONS: "--experimental-vm-modules"
+
+      - name: 📤 Subir reporte de mutación
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: mutation-report
+          path: backend/reports/mutation/
+          retention-days: 14
+
+  # ────────────────────────────────────────────────
+  # JOB 3: Build del frontend
+  # ────────────────────────────────────────────────
+  frontend-build:
+    name: 🏗️ Frontend Build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar Node 20
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: "npm"
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: 📦 Instalar dependencias frontend
+        working-directory: frontend
+        run: npm ci
+
+      - name: 🏗️ Build de producción
+        working-directory: frontend
+        run: npm run build
+
+      - name: 📤 Subir artefacto del build
+        uses: actions/upload-artifact@v4
+        with:
+          name: frontend-dist
+          path: frontend/dist/
+          retention-days: 3
+
+  # ────────────────────────────────────────────────
+  # JOB 4: E2E con Playwright
+  # ────────────────────────────────────────────────
+  e2e-tests:
+    name: 🎭 E2E Tests (Playwright)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    needs: [backend-tests, frontend-build]
+
+    steps:
+      - name: 📥 Clonar repositorio
+        uses: actions/checkout@v4
+
+      - name: 🟢 Configurar Node 20
         uses: actions/setup-node@v4
         with:
           node-version: 20
 
-      # 🔵 BACKEND
       - name: 📦 Instalar backend
-        run: |
-          cd backend
-          npm install
+        working-directory: backend
+        run: npm ci
 
-      - name: ⚙️ Prisma generate
+      - name: ⚙️ Prisma generate + migrate
+        working-directory: backend
         run: |
-          cd backend
           npx prisma generate
+          npx prisma migrate deploy
+        env:
+          DATABASE_URL: "file:./e2e-test.db"
 
-      - name: 🧪 Test backend
+      - name: 🚀 Levantar backend en background
+        working-directory: backend
         run: |
-          cd backend
-          npm test
+          npm start &
+          # Esperar a que el puerto esté disponible (máximo 30s)
+          # El endpoint raíz "/" responde con texto plano
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:3000/ && break || sleep 1
+          done
+        env:
+          NODE_ENV: test
+          PORT: 3000
+          DATABASE_URL: "file:./e2e-test.db"
 
-      # 🟣 FRONTEND
       - name: 📦 Instalar frontend
-        run: |
-          cd frontend
-          npm install
+        working-directory: frontend
+        run: npm ci
 
-      - name: 🏗️ Build frontend
+      - name: 🎭 Instalar browsers Playwright
+        working-directory: frontend
+        run: npx playwright install --with-deps chromium
+
+      - name: 🌐 Levantar frontend en background
+        working-directory: frontend
         run: |
-          cd frontend
-          npm run build
+          npm run dev &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:5173 && break || sleep 1
+          done
+        env:
+          VITE_API_URL: http://localhost:3000
+
+      - name: 🎭 Ejecutar tests E2E
+        working-directory: frontend
+        run: npx playwright test --reporter=list
+        env:
+          BASE_URL: http://localhost:5173
+
+      - name: 📤 Subir reporte Playwright
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report
+          path: frontend/playwright-report/
+          retention-days: 7
