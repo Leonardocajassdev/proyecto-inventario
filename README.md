@@ -104,7 +104,9 @@ Incluido dentro de los tests de Jest.
 Evalúa la calidad de los tests modificando el código.
 
 cd backend
+$env:NODE_OPTIONS="--experimental-vm-modules"
 npx stryker run
+
 🎭 End-to-End Testing (E2E)
 
 Simula el comportamiento real del usuario desde el frontend.

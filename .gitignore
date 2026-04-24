@@ -29,6 +29,7 @@ coverage/
 # Stryker (mutation testing)
 .stryker-tmp/
 reports/mutation/
+backend/reports/
 
 # Playwright
 test-results/
