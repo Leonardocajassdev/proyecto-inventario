@@ -187,17 +187,6 @@ jobs:
         env:
           DATABASE_URL: "file:./e2e-test.db"
 
-      - name: 🚀 Levantar backend en background
-        working-directory: backend
-        run: npm start &
-        env:
-          NODE_ENV: test
-          PORT: 3000
-          DATABASE_URL: "file:./e2e-test.db"
-
-      - name: ⏳ Esperar backend
-        run: npx wait-on http://localhost:3000/products --timeout 30000
-
       - name: 📦 Instalar frontend
         working-directory: frontend
         run: npm ci
@@ -206,14 +195,30 @@ jobs:
         working-directory: frontend
         run: npx playwright install --with-deps chromium
 
-      - name: 🌐 Levantar frontend en background
-        working-directory: frontend
-        run: npm run dev &
-        env:
-          VITE_API_URL: http://localhost:3000
+      - name: 🚀 Levantar backend y frontend, esperar que estén listos
+        run: |
+          # Arrancar backend
+          cd backend
+          NODE_ENV=test PORT=3000 DATABASE_URL="file:./e2e-test.db" npm start &
+          cd ..
 
-      - name: ⏳ Esperar frontend
-        run: npx wait-on http://localhost:5173 --timeout 15000
+          # Arrancar frontend
+          cd frontend
+          VITE_API_URL=http://localhost:3000 npm run dev &
+          cd ..
+
+          # Esperar ambos (mismo proceso, misma shell)
+          for i in $(seq 1 40); do
+            BACKEND=$(curl -sf http://localhost:3000/products > /dev/null 2>&1 && echo ok || echo no)
+            FRONTEND=$(curl -sf http://localhost:5173 > /dev/null 2>&1 && echo ok || echo no)
+            echo "Intento $i — backend: $BACKEND | frontend: $FRONTEND"
+            [ "$BACKEND" = "ok" ] && [ "$FRONTEND" = "ok" ] && break
+            sleep 2
+          done
+
+          # Verificar que ambos respondieron
+          curl -sf http://localhost:3000/products || (echo "Backend no responde" && exit 1)
+          curl -sf http://localhost:5173 || (echo "Frontend no responde" && exit 1)
 
       - name: 🎭 Ejecutar tests E2E
         working-directory: frontend
