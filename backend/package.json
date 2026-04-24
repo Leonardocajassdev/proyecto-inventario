@@ -13,7 +13,7 @@
   "test:pbt":      "node --experimental-vm-modules node_modules/jest/bin/jest.js --testPathPatterns=pbt",
   "test:coverage": "node --experimental-vm-modules node_modules/jest/bin/jest.js --coverage",
   "test:watch":    "node --experimental-vm-modules node_modules/jest/bin/jest.js --watch",
-  "mutation":      "stryker run"
+  "mutation": "cross-env NODE_OPTIONS=--experimental-vm-modules stryker run"
 },
   "keywords": [],
   "author": "",
