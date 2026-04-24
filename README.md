@@ -1,139 +1,181 @@
-📦 Sistema de Inventario
+# 📦 Sistema de Inventario
 
 Aplicación full-stack para la gestión de inventario que permite registrar productos, controlar movimientos de stock (entradas y salidas) y aplicar validaciones de negocio en tiempo real.
 
-🌐 Despliegue
-🔗 Frontend: https://proyecto-inventario-iota.vercel.app
-🔗 Backend: https://proyecto-inventario-5izm.onrender.com
+## 🌐 Despliegue
+- 🔗 **Frontend:** https://proyecto-inventario-iota.vercel.app
+- 🔗 **Backend:** https://proyecto-inventario-5izm.onrender.com
 
-⚠️ Nota: El backend puede tardar unos segundos en responder la primera vez (cold start en Render).
+> ⚠️ El backend puede tardar unos segundos en responder la primera vez (cold start en Render).
 
-🚀 Tecnologías
+---
 
-🔵 Backend
-Node.js
-Express
-Prisma ORM
-SQLite
+## 🚀 Tecnologías
 
-🟣 Frontend
-React
-Vite
+**Backend:** Node.js · Express · Prisma ORM · SQLite
 
-🧪 Testing & Calidad
-Jest (Unit Testing)
-Fast-check (Property-Based Testing)
-Stryker (Mutation Testing)
-Playwright (End-to-End Testing)
-GitHub Actions (CI/CD)
+**Frontend:** React · Vite
 
-📦 Funcionalidades
-Crear productos con stock mínimo configurable
-Registrar movimientos de inventario:
-Entrada (IN)
-Salida (OUT)
-Cálculo dinámico de stock basado en movimientos
-Validación de stock insuficiente
-Alerta visual de stock bajo
-Eliminación de productos con manejo de relaciones
+**Testing & Calidad:** Jest · Fast-check · Stryker · Playwright · GitHub Actions
 
-🧠 Reglas de negocio
-El stock no se almacena directamente, se calcula a partir de los movimientos
-No se permite registrar una salida si el stock disponible es insuficiente
-Se muestra una alerta cuando el stock es menor o igual al stock mínimo definido
+---
 
-🏗️ Estructura del proyecto
+## 📦 Funcionalidades
+
+- Crear productos con stock mínimo configurable
+- Registrar movimientos de inventario (Entrada / Salida)
+- Cálculo dinámico de stock basado en movimientos
+- Validación de stock insuficiente
+- Alerta visual de stock bajo
+- Eliminación de productos con manejo de relaciones
+
+---
+
+## 🧠 Reglas de negocio
+
+- El stock se calcula a partir de los movimientos (no se almacena directamente)
+- No se permite registrar una salida si el stock disponible es insuficiente
+- Se muestra una alerta cuando el stock es menor o igual al stock mínimo definido
+
+---
+
+## 🏗️ Estructura del proyecto
+
+```
 proyecto-inventario/
 ├── backend/        # API REST
 ├── frontend/       # Aplicación React
 ├── docs/           # Documentación generada con IA
 ├── prompts.md      # Uso de IA (requerido)
 └── README.md
+```
 
-⚙️ Cómo ejecutar el proyecto en local
+---
 
-🔵 Backend
+## ⚙️ Cómo ejecutar el proyecto en local
+
+### 🔵 Backend
+
+```bash
 cd backend
 npm install
 npx prisma generate
-npx prisma db push
+npx prisma migrate dev
 npm run dev
+```
 
-Servidor en:
-👉 http://localhost:3000
+Servidor en: http://localhost:3000
 
-🟣 Frontend
+### 🟣 Frontend
+
+```bash
 cd frontend
 npm install
 npm run dev
+```
 
-Aplicación en:
-👉 http://localhost:5173
+Aplicación en: http://localhost:5173
 
-🔧 Variables de entorno
-Backend (backend/.env)
+### 🔧 Variables de entorno
+
+**Backend** (`backend/.env`):
+```
 DATABASE_URL="file:./dev.db"
-Frontend (frontend/.env)
+```
+
+**Frontend** (`frontend/.env`):
+```
 VITE_API_URL=http://localhost:3000
+```
 
-🔌 Endpoints principales
-Productos
-GET /products → Obtener productos con stock calculado
-POST /products → Crear producto
-DELETE /products/:id → Eliminar producto
-Movimientos
-POST /movements → Registrar movimiento de inventario
-🧪 Testing
+---
 
-El proyecto implementa múltiples niveles de pruebas para garantizar calidad y robustez:
+## 🔌 Endpoints principales
 
-✔ Unit Testing
+**Productos**
+- `GET /products` → Obtener productos con stock calculado
+- `POST /products` → Crear producto
+- `DELETE /products/:id` → Eliminar producto
 
-Valida la lógica de cálculo de stock.
+**Movimientos**
+- `POST /movements` → Registrar movimiento de inventario
 
+---
+
+## 🧪 Testing
+
+El proyecto implementa múltiples niveles de pruebas:
+
+### ✔ Unit Testing
+
+Valida la lógica de cálculo de stock y movimientos.
+
+```bash
 cd backend
-npm test
-🔬 Property-Based Testing (PBT)
+npm run test:unit
+```
 
-Verifica invariantes del sistema con generación de datos aleatorios.
+### 🔬 Property-Based Testing (PBT)
 
-Incluido dentro de los tests de Jest.
+Verifica invariantes del sistema con generación de datos aleatorios usando `fast-check`.
 
-🧬 Mutation Testing
-
-Evalúa la calidad de los tests modificando el código.
-
+```bash
 cd backend
-$env:NODE_OPTIONS="--experimental-vm-modules"
-npx stryker run
+npm run test:pbt
+```
 
-🎭 End-to-End Testing (E2E)
+### 📊 Coverage
 
-Simula el comportamiento real del usuario desde el frontend.
+```bash
+cd backend
+npm run test:coverage
+```
 
+### 🧬 Mutation Testing (Stryker)
+
+Evalúa la calidad de los tests modificando el código fuente y verificando que los tests fallen. Score actual: **100%**.
+
+```bash
+cd backend
+npm run mutation
+```
+
+### 🎭 End-to-End Testing (Playwright)
+
+Simula el comportamiento real del usuario desde el navegador. Cubre el flujo completo de creación y visualización de productos.
+
+```bash
 cd frontend
 npm run test:e2e
+```
 
-⚠️ Nota: Las pruebas E2E se ejecutan en entorno local y no forman parte del pipeline CI para evitar problemas de infraestructura en entornos efímeros.
+> ⚠️ Para correr E2E en local, asegúrate de tener el backend corriendo en `http://localhost:3000`.
 
-⚙️ CI/CD
+---
 
-El proyecto incluye un pipeline de integración continua con GitHub Actions que:
+## ⚙️ CI/CD
 
-Instala dependencias
-Ejecuta tests del backend
-Construye el frontend
+El proyecto incluye un pipeline completo con **GitHub Actions** (`.github/workflows/ci.yml`) que ejecuta automáticamente en cada push a `main`:
 
-📄 Archivo: .github/workflows/ci.yml
+| Job | Descripción |
+|-----|-------------|
+| 🧪 Backend Tests | Unit, integración, PBT y coverage |
+| 🧬 Mutation Testing | Stryker con reporte de mutantes |
+| 🏗️ Frontend Build | Build de producción con Vite |
+| 🎭 E2E Tests | Playwright con backend y frontend levantados en CI |
 
-📌 Decisiones técnicas
-El stock se calcula dinámicamente para evitar inconsistencias
-Prisma ORM simplifica la gestión de base de datos
-Separación clara de responsabilidades (routes, services, utils)
-Uso de variables de entorno para soportar múltiples entornos (local/producción)
-Diseño de UI enfocado en usabilidad (acciones a la izquierda, visualización a la derecha)
+---
 
-⚠️ Consideraciones
-Base de datos SQLite incluida para facilitar ejecución local
-No se implementa autenticación (fuera del alcance de la prueba)
-Backend en Render puede presentar latencia inicial
+## 📌 Decisiones técnicas
+
+- El stock se calcula dinámicamente para evitar inconsistencias
+- Prisma ORM simplifica la gestión de base de datos
+- Separación clara de responsabilidades (routes, services)
+- Variables de entorno para soportar múltiples entornos
+- Diseño de UI enfocado en usabilidad
+
+## ⚠️ Consideraciones
+
+- Base de datos SQLite para facilitar ejecución local
+- No se implementa autenticación (fuera del alcance)
+- Backend en Render puede presentar latencia inicial (cold start)
