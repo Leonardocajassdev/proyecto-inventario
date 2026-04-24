@@ -197,17 +197,18 @@ jobs:
 
       - name: 🚀 Levantar backend y frontend, esperar que estén listos
         run: |
-          # Arrancar backend
+          # Arrancar backend con logs visibles
           cd backend
-          NODE_ENV=test PORT=3000 DATABASE_URL="file:./e2e-test.db" npm start &
+          NODE_ENV=test PORT=3000 DATABASE_URL="file:./e2e-test.db" npm start > /tmp/backend.log 2>&1 &
+          BACKEND_PID=$!
           cd ..
 
           # Arrancar frontend
           cd frontend
-          VITE_API_URL=http://localhost:3000 npm run dev &
+          VITE_API_URL=http://localhost:3000 npm run dev > /tmp/frontend.log 2>&1 &
           cd ..
 
-          # Esperar ambos (mismo proceso, misma shell)
+          # Esperar ambos
           for i in $(seq 1 40); do
             BACKEND=$(curl -sf http://localhost:3000/products > /dev/null 2>&1 && echo ok || echo no)
             FRONTEND=$(curl -sf http://localhost:5173 > /dev/null 2>&1 && echo ok || echo no)
@@ -215,6 +216,10 @@ jobs:
             [ "$BACKEND" = "ok" ] && [ "$FRONTEND" = "ok" ] && break
             sleep 2
           done
+
+          # Mostrar logs del backend para debug
+          echo "=== BACKEND LOG ==="
+          cat /tmp/backend.log
 
           # Verificar que ambos respondieron
           curl -sf http://localhost:3000/products || (echo "Backend no responde" && exit 1)
